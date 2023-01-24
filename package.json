@@ -1,0 +1,12 @@
+{
+  "name": "mockslate",
+  "version": "0.0.1",
+  "description": "Mock server to mock anything",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "scssyworks",
+  "license": "MIT"
+}
