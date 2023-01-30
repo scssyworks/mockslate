@@ -1,0 +1,13 @@
+{
+    "httpRequest": {
+        "path": "/path/to/api",
+        "method": "GET"
+    },
+    "httpResponse": {
+        "status": 200,
+        "response": {
+            "naman": "hello earth",
+            "anotherkey": "added"
+        }
+    }
+}
