@@ -2,11 +2,24 @@
   "name": "mockslate",
   "version": "0.0.1",
   "description": "Mock server to mock anything",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prestart": "rome check ./ && rome format ./ --write",
+    "start": "node ./server.js --test"
   },
   "keywords": [],
   "author": "scssyworks",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "express": "^4.18.2",
+    "node-watch": "^0.7.3",
+    "qs": "^6.11.0",
+    "uuid": "^9.0.0",
+    "yargs": "^17.6.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20",
+    "rome": "^11.0.0"
+  }
 }
