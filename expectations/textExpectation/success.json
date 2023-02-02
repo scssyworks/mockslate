@@ -1,0 +1,12 @@
+{
+    "httpRequest": {
+        "method": "GET",
+        "path": "/path/to/api"
+    },
+    "httpResponse": {
+        "statusCode": 200,
+        "response": {
+            "key": "hello"
+        }
+    }
+}

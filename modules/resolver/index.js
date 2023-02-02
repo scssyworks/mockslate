@@ -3,17 +3,18 @@ const { isEmptyObject } = require('../utils');
 const qs = require('qs');
 const { removeFromCache } = require('../cache');
 const { log } = require('../logging');
+const { codes } = require('../../config/constants');
 
-function getEmptyResponse(code = 500) {
+function getEmptyResponse(code = codes.INTERNAL_SERVER_ERROR) {
   let error = '';
   let body = '';
   switch (code) {
-    case 404:
-      error = 'NOT_FOUND';
+    case codes.NOT_FOUND:
+      error = codes[codes.NOT_FOUND];
       body = 'Expectation not found! Please try again after some time.';
       break;
-    case 500:
-      error = 'INTERNAL_SERVER_ERROR';
+    case codes.INTERNAL_SERVER_ERROR:
+      error = codes[codes.INTERNAL_SERVER_ERROR];
       body =
         'Error while loading expectation. Please check if expectation format is correct!';
       break;
@@ -23,7 +24,7 @@ function getEmptyResponse(code = 500) {
 
 function readExpectation(path, cacheEntry) {
   let returnResponse = {
-    code: 200,
+    code: codes.SUCCESS,
     response: {},
   };
   if (fs.existsSync(path)) {
@@ -35,17 +36,13 @@ function readExpectation(path, cacheEntry) {
     if (isEmptyObject(httpResponse)) {
       returnResponse = {
         ...returnResponse,
-        ...getEmptyResponse(500),
+        ...getEmptyResponse(codes.INTERNAL_SERVER_ERROR),
       };
     } else {
-      const {
-        status = 200,
-        statusCode = 200,
-        response: mockResponse = {},
-      } = httpResponse;
+      const { status, statusCode, response: mockResponse = {} } = httpResponse;
       returnResponse = {
         ...returnResponse,
-        code: status || statusCode,
+        code: status || statusCode || codes.SUCCESS,
         response: mockResponse,
       };
     }
@@ -64,7 +61,6 @@ module.exports = function resolver(cache, requestedPath, req) {
     // A complete match was found
     return readExpectation(cache[completePath], completePath);
   }
-  log('Attempting response with partial match...');
   // Check for partial matches
   // Check if query string matched
   const qsPath = `${requestedPath} qs:${qs.stringify(req.query)} body:`;
@@ -83,5 +79,5 @@ module.exports = function resolver(cache, requestedPath, req) {
   if (cache[emptyPath]) {
     return readExpectation(cache[emptyPath]);
   }
-  return getEmptyResponse(404);
+  return getEmptyResponse(codes.NOT_FOUND);
 };

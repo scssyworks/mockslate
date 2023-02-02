@@ -28,8 +28,8 @@ module.exports = {
       } = httpRequest;
       let code = 200;
       if (isObject(httpResponse)) {
-        const { status = 200, statusCode = 200 } = httpResponse;
-        code = status || statusCode;
+        const { status, statusCode } = httpResponse;
+        code = status || statusCode || 200;
       }
       if (
         typeof method === 'string' &&
