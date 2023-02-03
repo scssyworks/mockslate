@@ -2,7 +2,7 @@ const { v4: uuid } = require('uuid');
 const path = require('path');
 const getCacheLocation = require('./getCacheLocation');
 const EventEmitter = require('events');
-const { log } = require('../logging');
+const { log, info } = require('../logging');
 const {
   isObject,
   toQS,
@@ -70,12 +70,20 @@ module.exports = {
   },
   request(key, callback) {
     if (key in requestCache) {
-      return requestCache[key];
+      info('Response(cached):');
+    } else {
+      requestCache[key] = callback();
+      info('Response:');
     }
-    return callback(requestCache);
+    return requestCache[key];
   },
   requestInvalidate(key) {
-    deleteKey(requestCache, key);
+    const currCacheKeys = Object.keys(requestCache);
+    currCacheKeys.forEach((cacheKey) => {
+      if (cacheKey.includes(key)) {
+        deleteKey(requestCache, key);
+      }
+    });
   },
 };
 

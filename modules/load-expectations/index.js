@@ -1,7 +1,13 @@
 const args = require('../arguments');
 const path = require('path');
 const watch = require('node-watch');
-const { cache, cacheEmitter, getCache, setCache } = require('../cache');
+const {
+  cache,
+  cacheEmitter,
+  getCache,
+  setCache,
+  requestInvalidate,
+} = require('../cache');
 const { log, error } = require('../logging');
 const getExistingCache = require('../cache/getExistingCache');
 const {
@@ -61,6 +67,7 @@ module.exports = {
     log(messages.SYNC);
     watch(expectationsDir, { recursive: true }, (_, filePath) => {
       filePath = filePath.trim();
+      requestInvalidate(filePath);
       if (exists(filePath)) {
         if (isFile(filePath)) {
           fetchExpectations(filePath);

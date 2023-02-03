@@ -35,7 +35,6 @@ module.exports = function server(handler) {
       }
       if (result) {
         const { code, response } = result;
-        info('Response:');
         log({ code, response });
         res.status(code).json(response);
       } else {

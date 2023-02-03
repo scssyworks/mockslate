@@ -1,5 +1,5 @@
 const { isEmptyObject, toQS, exists, readJSON } = require('../utils');
-const { removeFromCache } = require('../cache');
+const { removeFromCache, request } = require('../cache');
 const { codes, errors } = require('../../config/constants');
 
 function getEmptyResponse(code = codes.INTERNAL_SERVER_ERROR) {
@@ -19,29 +19,35 @@ function getEmptyResponse(code = codes.INTERNAL_SERVER_ERROR) {
 }
 
 function readExpectation(path, cacheEntry) {
-  let returnResponse = {
-    code: codes.SUCCESS,
-    response: {},
-  };
-  if (exists(path)) {
-    const { httpResponse } = readJSON(path);
-    if (isEmptyObject(httpResponse)) {
-      returnResponse = {
-        ...returnResponse,
-        ...getEmptyResponse(codes.INTERNAL_SERVER_ERROR),
-      };
+  return request(path, () => {
+    let returnResponse = {
+      code: codes.SUCCESS,
+      response: {},
+    };
+    if (exists(path)) {
+      const { httpResponse } = readJSON(path);
+      if (isEmptyObject(httpResponse)) {
+        returnResponse = {
+          ...returnResponse,
+          ...getEmptyResponse(codes.INTERNAL_SERVER_ERROR),
+        };
+      } else {
+        const {
+          status,
+          statusCode,
+          response: mockResponse = {},
+        } = httpResponse;
+        returnResponse = {
+          ...returnResponse,
+          code: status || statusCode || codes.SUCCESS,
+          response: mockResponse,
+        };
+      }
     } else {
-      const { status, statusCode, response: mockResponse = {} } = httpResponse;
-      returnResponse = {
-        ...returnResponse,
-        code: status || statusCode || codes.SUCCESS,
-        response: mockResponse,
-      };
+      removeFromCache(cacheEntry);
     }
-  } else {
-    removeFromCache(cacheEntry);
-  }
-  return returnResponse;
+    return returnResponse;
+  });
 }
 
 module.exports = function resolver(cache, requestedPath, req) {
@@ -61,7 +67,7 @@ module.exports = function resolver(cache, requestedPath, req) {
   }
   const emptyPath = `${requestedPath} qs: body:`;
   if (cache[emptyPath]) {
-    return readExpectation(cache[emptyPath]);
+    return readExpectation(cache[emptyPath], emptyPath);
   }
   return getEmptyResponse(codes.NOT_FOUND);
 };
