@@ -6,7 +6,8 @@
     "httpResponse": {
         "statusCode": 404,
         "response": {
-            "code": "NOT_FOUND"
+            "code": "NOT_FOUND",
+            "message": "This request is not found"
         }
     }
 }
