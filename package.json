@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "prestart": "rome check ./ && rome format ./ --write",
-    "start": "node ./server.js --test"
+    "start": "node --trace-warnings ./server.js --test"
   },
   "keywords": [],
   "author": "scssyworks",

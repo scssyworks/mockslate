@@ -1,11 +1,13 @@
 const { loadExpectations } = require('../../modules/load-expectations');
 const { log } = require('../../modules/logging');
+const { formatMessage } = require('../../modules/utils');
+const { messages } = require('../constants');
 
 module.exports = function listener(port) {
   return () => {
-    log(`Server is listening on ${port}`);
-    log('Warming up cache...');
+    log(formatMessage(messages.PORT, [port]));
+    log(messages.CACHE);
     loadExpectations();
-    log('Expectations are ready!');
+    log(messages.CACHE_READY);
   };
 };

@@ -1,81 +1,71 @@
 const args = require('../arguments');
 const path = require('path');
-const fs = require('fs');
 const watch = require('node-watch');
-const {
-  cache,
-  isCacheEmpty,
-  cacheEmitter,
-  getCache,
-  setCache,
-} = require('../cache');
+const { cache, cacheEmitter, getCache, setCache } = require('../cache');
 const { log, error } = require('../logging');
 const getExistingCache = require('../cache/getExistingCache');
+const {
+  isDir,
+  readDir,
+  readJSON,
+  isEmptyObject,
+  formatMessage,
+  exists,
+  isFile,
+  deleteKey,
+} = require('../utils');
+const { errors, messages, events } = require('../../config/constants');
 
 process.on('exit', (code) => {
   if (code === 0) {
-    log(`Gracefully shutting down MockSlate server. code: ${code}`);
+    log(messages.EXIT_0);
   } else {
-    error(
-      `Server stopped unexpectedly! code: ${code}. Run mockslate --test for more details.`
-    );
+    error(formatMessage(messages.EXIT_N, [code]));
   }
 });
 
 function fetchExpectations(dir) {
-  try {
-    if (fs.statSync(dir).isDirectory()) {
-      fs.readdirSync(dir).forEach((childDir) => {
-        fetchExpectations(path.join(dir, childDir));
-      });
-    } else {
-      const fileContent = fs.readFileSync(dir, {
-        encoding: 'utf-8',
-      });
-      if (fileContent.trim()) {
-        cache(JSON.parse(fileContent), dir);
-      }
+  if (isDir(dir)) {
+    readDir(dir).forEach((childDir) => {
+      fetchExpectations(path.join(dir, childDir));
+    });
+  } else {
+    const fileData = readJSON(dir);
+    if (!isEmptyObject(fileData)) {
+      cache(fileData, dir);
     }
-  } catch (e) {
-    if (args.test) {
-      error(e);
-    }
-    process.exit(1);
   }
 }
 
 function refreshExpectations(expectationsDir) {
-  if (fs.existsSync(expectationsDir)) {
+  if (exists(expectationsDir)) {
     fetchExpectations(expectationsDir);
-    cacheEmitter.emit('success', getCache());
+    cacheEmitter.emit(events.SUCCESS, getCache());
   } else {
-    cacheEmitter.emit('error');
-    error('Expecation directory not found!');
+    cacheEmitter.emit(events.ERROR);
+    error(errors.DIR_NOT_FOUND_ERR);
   }
 }
 
 module.exports = {
   refreshExpectations,
   loadExpectations() {
-    const expectationsDir = path.join(process.cwd(), args.dir);
-    // If cache exists then use cache instead to save load time
+    const expectationsDir = path.join(process.cwd(), args.watch);
     const existingCache = getExistingCache();
-    // If cache exists then cache is prioritized to start the server quickly
-    if (!isCacheEmpty(existingCache)) {
+    if (!isEmptyObject(existingCache)) {
       setCache(existingCache);
-      cacheEmitter.emit('success', existingCache);
+      cacheEmitter.emit(events.SUCCESS, existingCache);
     }
     // expectations are refreshed regardless of cache existence however server is ready sooner
     refreshExpectations(expectationsDir);
-    log('Expectations synced...');
+    log(messages.SYNC);
     watch(expectationsDir, { recursive: true }, (_, filePath) => {
       filePath = filePath.trim();
-      if (fs.existsSync(filePath)) {
-        if (fs.statSync(filePath).isFile()) {
+      if (exists(filePath)) {
+        if (isFile(filePath)) {
           fetchExpectations(filePath);
         }
       } else {
-        // Remove potential expectations from cache that matches the path
         const currentCache = getCache();
         const removeKeys = [];
         Object.keys(currentCache).forEach((key) => {
@@ -84,9 +74,8 @@ module.exports = {
           }
         });
         removeKeys.forEach((key) => {
-          log(`Removed expectation: ${key}`);
-          // rome-ignore lint/performance/noDelete: Removing the key instead of setting as undefined to save disk space
-          delete currentCache[key];
+          log(formatMessage(messages.EXP_REMOVED, [key]));
+          deleteKey(currentCache, key);
         });
       }
     });

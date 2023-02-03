@@ -1,6 +1,6 @@
 module.exports = require('yargs')
-  .option('dir', {
-    alias: 'd',
+  .option('watch', {
+    alias: 'w',
     type: 'string',
     default: 'expectations',
     description: "Expectations directory. Default is 'expectations'.",
@@ -10,22 +10,15 @@ module.exports = require('yargs')
     type: 'boolean',
     hidden: true,
   })
-  .option('cert', {
-    alias: 'c',
-    type: 'string',
-    default: process.cwd(),
-    description:
-      'Certificate directory to run server using https. Certificate directory must contain "key.pem" (private key) and "cert.pem" (certificate) files.',
-  })
   .option('port', {
     alias: 'p',
     type: 'number',
-    default: process.env.PORT || 4000,
+    default: 4000,
     description: 'Port number on which this server will run. Default: 4000',
   })
   .option('sslPort', {
     alias: 's',
     type: 'number',
-    default: process.env.PORT || 8443,
+    default: 8443,
     description: 'Port number on which this server will run. Default: 8443',
   }).argv;

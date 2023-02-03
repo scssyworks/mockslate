@@ -1,26 +1,16 @@
 const chalk = require('chalk');
-
-function getValidArgs(args) {
-  const restArgs = [];
-  const strArgs = [];
-  args.forEach((arg) => {
-    if (arg === null || typeof arg !== 'object') {
-      strArgs.push(arg);
-    } else {
-      restArgs.push(arg);
-    }
-  });
-  return { strArgs, restArgs };
-}
+const { isObject } = require('../utils/objects');
 
 function logger(color, args) {
-  const { strArgs, restArgs } = getValidArgs(args);
-  if (strArgs.length) {
-    console.log(chalk[color](chalk.bold(...args)));
-  }
-  if (restArgs.length) {
-    console.log(...restArgs);
-  }
+  const formattedArgs = [];
+  args.forEach((arg) => {
+    if (isObject(arg)) {
+      formattedArgs.push(`\n${JSON.stringify(arg, null, 2)}\n`);
+    } else {
+      formattedArgs.push(chalk.bold(arg));
+    }
+  });
+  console.log(chalk[color](formattedArgs.join(' ')));
 }
 
 module.exports = {

@@ -1,24 +1,18 @@
 const path = require('path');
-const fs = require('fs');
+const { exists, makeDir } = require('../utils');
 
 module.exports = function getCacheLocation() {
-  const cwdNodeModules = path.join(process.cwd(), 'node_modules');
-  let cacheFolderLocation = process.cwd();
-  let cacheLocation = null;
   try {
-    if (fs.existsSync(cwdNodeModules)) {
-      cacheFolderLocation = cwdNodeModules;
+    const cacheLocation = path.join(
+      process.cwd(),
+      'node_modules',
+      '.cache',
+      'mockslate'
+    );
+    if (!exists(cacheLocation)) {
+      makeDir(cacheLocation);
     }
-    cacheLocation = path.join(cacheFolderLocation, '.cache');
-
-    if (cacheLocation && !fs.existsSync(cacheLocation)) {
-      fs.mkdirSync(cacheLocation);
-    }
-    const cachePath = path.join(cacheLocation, 'mockslate');
-    if (!fs.existsSync(cachePath)) {
-      fs.mkdirSync(cachePath);
-    }
-    return cachePath;
+    return cacheLocation;
   } catch (e) {}
   return null;
 };

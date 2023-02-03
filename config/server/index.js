@@ -55,8 +55,8 @@ module.exports = function server(handler) {
 
   if (enableSSL) {
     const options = {
-      key: fs.readFileSync(path.join(args.cert, 'key.pem')),
-      cert: fs.readFileSync(path.join(args.cert, 'cert.pem')),
+      key: fs.readFileSync(path.join(process.cwd(), 'key.pem')),
+      cert: fs.readFileSync(path.join(process.cwd(), 'cert.pem')),
     };
     https
       .createServer(options, app)

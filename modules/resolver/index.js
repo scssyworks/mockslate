@@ -1,9 +1,6 @@
-const fs = require('fs');
-const { isEmptyObject } = require('../utils');
-const qs = require('qs');
+const { isEmptyObject, toQS, exists, readJSON } = require('../utils');
 const { removeFromCache } = require('../cache');
-const { log } = require('../logging');
-const { codes } = require('../../config/constants');
+const { codes, errors } = require('../../config/constants');
 
 function getEmptyResponse(code = codes.INTERNAL_SERVER_ERROR) {
   let error = '';
@@ -11,12 +8,11 @@ function getEmptyResponse(code = codes.INTERNAL_SERVER_ERROR) {
   switch (code) {
     case codes.NOT_FOUND:
       error = codes[codes.NOT_FOUND];
-      body = 'Expectation not found! Please try again after some time.';
+      body = errors.NOT_FOUND_ERR;
       break;
     case codes.INTERNAL_SERVER_ERROR:
       error = codes[codes.INTERNAL_SERVER_ERROR];
-      body =
-        'Error while loading expectation. Please check if expectation format is correct!';
+      body = errors.EXPECTATION_ERR;
       break;
   }
   return { code, response: { error, body } };
@@ -27,12 +23,8 @@ function readExpectation(path, cacheEntry) {
     code: codes.SUCCESS,
     response: {},
   };
-  if (fs.existsSync(path)) {
-    const { httpResponse } = JSON.parse(
-      fs.readFileSync(path, {
-        encoding: 'utf-8',
-      })
-    );
+  if (exists(path)) {
+    const { httpResponse } = readJSON(path);
     if (isEmptyObject(httpResponse)) {
       returnResponse = {
         ...returnResponse,
@@ -53,28 +45,20 @@ function readExpectation(path, cacheEntry) {
 }
 
 module.exports = function resolver(cache, requestedPath, req) {
-  // Check for complete match
-  const completePath = `${requestedPath} qs:${qs.stringify(
-    req.query
-  )} body:${qs.stringify(req.body)}`.trim();
+  const completePath = `${requestedPath} qs:${toQS(req.query)} body:${toQS(
+    req.body
+  )}`.trim();
   if (cache[completePath]) {
-    // A complete match was found
     return readExpectation(cache[completePath], completePath);
   }
-  // Check for partial matches
-  // Check if query string matched
-  const qsPath = `${requestedPath} qs:${qs.stringify(req.query)} body:`;
+  const qsPath = `${requestedPath} qs:${toQS(req.query)} body:`;
   if (cache[qsPath]) {
-    // A query string match was found
     return readExpectation(cache[qsPath], completePath);
   }
-  // Check if body match was found
-  const bodyPath = `${requestedPath} qs: body:${qs.stringify(req.body)}`.trim();
+  const bodyPath = `${requestedPath} qs: body:${toQS(req.body)}`.trim();
   if (cache[bodyPath]) {
-    // A query string match was found
     return readExpectation(cache[bodyPath], completePath);
   }
-  // Check a match with no query string and no body
   const emptyPath = `${requestedPath} qs: body:`;
   if (cache[emptyPath]) {
     return readExpectation(cache[emptyPath]);

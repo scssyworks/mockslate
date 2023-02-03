@@ -1,7 +1,7 @@
 const args = require('../arguments');
-const fs = require('fs');
 const path = require('path');
 const { error } = require('../logging');
+const { exists } = require('../utils');
 
 let enableSSL = null;
 
@@ -11,8 +11,8 @@ module.exports = function enableHttps() {
   }
   try {
     enableSSL =
-      fs.existsSync(path.join(args.cert, 'key.pem')) &&
-      fs.existsSync(path.join(args.cert, 'cert.pem'));
+      exists(path.join(process.cwd(), 'key.pem')) &&
+      exists(path.join(process.cwd(), 'cert.pem'));
     return enableSSL;
   } catch (e) {
     if (args.test) {
