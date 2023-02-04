@@ -1,27 +1,36 @@
-const args = require('../arguments');
-const { error } = require('../logging');
 const fs = require('fs');
 const { isObject } = require('./objects');
+const { handler } = require('./handler');
 
+/**
+ * Checks if file exists
+ * @param {string} inputPath File or folder path
+ * @returns {boolean}
+ */
 function exists(inputPath) {
   return typeof inputPath === 'string' && fs.existsSync(inputPath);
 }
 
+/**
+ * Reads JSON text from file and returns a parsed object
+ * @param {string} inputPath File path
+ * @returns {boolean}
+ */
 function readJSON(inputPath) {
-  try {
+  return handler(() => {
     const fileData = fs.readFileSync(inputPath, {
       encoding: 'utf-8',
     });
     const parsedData = JSON.parse(fileData.trim()); // If parse failed, method will return empty object
     return parsedData;
-  } catch (e) {
-    if (args.test) {
-      error(e);
-    }
-    return {};
-  }
+  }, {});
 }
 
+/**
+ * Writes object data as JSON
+ * @param {string} inputPath File path
+ * @param {{[key: string]: any}} data Data object
+ */
 function writeJSON(inputPath, data) {
   if (typeof inputPath === 'string' && isObject(data)) {
     const stringData = JSON.stringify(data);
@@ -29,48 +38,71 @@ function writeJSON(inputPath, data) {
   }
 }
 
+/**
+ * Gets stats for file or folder
+ * @param {string} inputPath File or folder path
+ * @returns {fs.Stats}
+ */
 function getStats(inputPath) {
   return fs.statSync(inputPath);
 }
 
+/**
+ * Checks if input path is a folder
+ * @param {string} inputPath File or folder path
+ * @returns {boolean}
+ */
 function isDir(inputPath) {
-  try {
+  return handler(() => {
     const isDirectory = getStats(inputPath).isDirectory();
     return isDirectory;
-  } catch (e) {
-    if (args.test) {
-      error(e);
-    }
-    return false;
-  }
+  }, false);
 }
 
+/**
+ * Checks if input path is a file
+ * @param {string} inputPath File or folder path
+ * @returns {boolean}
+ */
 function isFile(inputPath) {
-  try {
+  return handler(() => {
     const isFile = getStats(inputPath).isFile();
     return isFile;
-  } catch (e) {
-    if (args.test) {
-      error(e);
-    }
-    return false;
-  }
+  }, false);
 }
 
+/**
+ * Returns list of files and folders within a directory
+ * @param {string} inputPath Folder path
+ * @returns {string[]}
+ */
 function readDir(inputPath) {
   return fs.readdirSync(inputPath);
 }
 
+/**
+ * Creates a directory
+ * @param {string} inputPath Folder path
+ */
 function makeDir(inputPath) {
   fs.mkdirSync(inputPath, {
     recursive: true,
   });
 }
 
+/**
+ * Gets modified time of a file
+ * @param {string} inputPath File or folder path
+ * @returns {number}
+ */
 function getFileTimestamp(inputPath) {
   return getStats(inputPath).mtime.getTime();
 }
 
+/**
+ * Deletes a file or folder
+ * @param {string} inputPath File or folder path
+ */
 function deleteFile(inputPath) {
   fs.unlinkSync(inputPath);
 }
