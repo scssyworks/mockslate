@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "prestart": "rome check ./ && rome format ./ --write",
-    "start": "node --trace-warnings ./server.js --test"
+    "start": "node --trace-warnings ./server.js --test",
+    "test": "jest"
   },
   "keywords": [],
   "author": "scssyworks",
@@ -19,6 +20,8 @@
     "yargs": "^17.6.2"
   },
   "devDependencies": {
+    "@types/jest": "^29.4.0",
+    "jest": "^29.4.1",
     "nodemon": "^2.0.20",
     "rome": "^11.0.0"
   }
