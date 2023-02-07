@@ -13,6 +13,7 @@ const errors = {
     'Error while loading expectation. Please check if expectation format is correct!',
   FILE_NOT_FOUND_ERR: 'File not available on disk!',
   DIR_NOT_FOUND_ERR: 'Expectations directory not found!',
+  INVALID_DATA_ERR: 'Invalid JSON data',
 };
 
 const events = {

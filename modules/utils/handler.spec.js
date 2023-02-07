@@ -10,7 +10,7 @@ jest.mock('../logging', () => ({
   error: () => mockError(),
 }));
 
-describe('Handler', () => {
+describe('handler()', () => {
   afterAll(() => {
     jest.resetAllMocks();
   });

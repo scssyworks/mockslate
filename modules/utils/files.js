@@ -1,6 +1,7 @@
 const fs = require('fs');
 const { isObject } = require('./objects');
 const { handler } = require('./handler');
+const { errors } = require('../../config/constants');
 
 /**
  * Checks if file exists
@@ -22,6 +23,9 @@ function readJSON(inputPath) {
       encoding: 'utf-8',
     });
     const parsedData = JSON.parse(fileData.trim()); // If parse failed, method will return empty object
+    if (!parsedData) {
+      throw new Error(errors.INVALID_DATA_ERR);
+    }
     return parsedData;
   }, {});
 }
@@ -77,7 +81,13 @@ function isFile(inputPath) {
  * @returns {string[]}
  */
 function readDir(inputPath) {
-  return fs.readdirSync(inputPath);
+  return handler(() => {
+    if (typeof inputPath === 'string' && inputPath.trim()) {
+      const files = fs.readdirSync(inputPath);
+      return files;
+    }
+    return [];
+  }, []);
 }
 
 /**
@@ -85,9 +95,11 @@ function readDir(inputPath) {
  * @param {string} inputPath Folder path
  */
 function makeDir(inputPath) {
-  fs.mkdirSync(inputPath, {
-    recursive: true,
-  });
+  if (typeof inputPath === 'string' && inputPath.trim()) {
+    fs.mkdirSync(inputPath, {
+      recursive: true,
+    });
+  }
 }
 
 /**

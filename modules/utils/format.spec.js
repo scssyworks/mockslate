@@ -1,7 +1,7 @@
 const { formatMessage } = require('./format');
 
 describe('format', () => {
-  describe('formatMessage', () => {
+  describe('formatMessage()', () => {
     it('should return formatted text for provided arguments', () => {
       expect(formatMessage('Test {0}, {0} and {1}', ['ZERO', 'ONE'])).toBe(
         'Test ZERO, ZERO and ONE'
