@@ -68,7 +68,7 @@ describe('resolver()', () => {
       code: codes.NOT_FOUND,
       response: {
         body: errors.NOT_FOUND_ERR,
-        error: codes[404],
+        error: codes[codes.NOT_FOUND],
       },
     });
   });
