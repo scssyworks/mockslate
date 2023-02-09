@@ -1,8 +1,7 @@
 const getCacheLocation = require('./getCacheLocation');
 const path = require('path');
-const args = require('../arguments');
-const { error } = require('../logging');
 const { getFileTimestamp, deleteFile, readDir, readJSON } = require('../utils');
+const { handler } = require('../utils/handler');
 
 const cacheLocation = getCacheLocation();
 
@@ -19,26 +18,23 @@ function deleteOldCaches(oldCaches) {
 }
 
 module.exports = function getExistingCache() {
-  try {
+  return handler(() => {
+    let inMemoryCache = null;
     const caches = readDir(cacheLocation);
     caches.sort((c1, c2) => getTimestamp(c2) - getTimestamp(c1));
-    const [latestCache, ...oldCaches] = caches;
-    const latestCacheTimestamp = getTimestamp(latestCache);
-    const oldCachesLength = oldCaches.length;
-    if (Date.now() - latestCacheTimestamp > 24 * 60 * 60 * 1000) {
-      oldCaches.push(latestCache);
-    }
-    const oldCachesLengthAfterValidation = oldCaches.length;
-    deleteOldCaches(oldCaches);
-    let inMemoryCache = null;
-    if (oldCachesLengthAfterValidation === oldCachesLength) {
-      inMemoryCache = readJSON(path.join(cacheLocation, latestCache));
+    if (caches.length) {
+      const [latestCache, ...oldCaches] = caches;
+      const oldCachesLength = oldCaches.length;
+      const latestCacheTimestamp = getTimestamp(latestCache);
+      if (Date.now() - latestCacheTimestamp > 24 * 60 * 60 * 1000) {
+        oldCaches.push(latestCache);
+      }
+      const oldCachesLengthAfterValidation = oldCaches.length;
+      deleteOldCaches(oldCaches);
+      if (oldCachesLengthAfterValidation === oldCachesLength) {
+        inMemoryCache = readJSON(path.join(cacheLocation, latestCache));
+      }
     }
     return inMemoryCache;
-  } catch (e) {
-    if (args.test) {
-      error(e);
-    }
-    return null;
-  }
+  }, null);
 };

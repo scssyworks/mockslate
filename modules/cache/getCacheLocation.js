@@ -1,8 +1,9 @@
 const path = require('path');
 const { exists, makeDir } = require('../utils');
+const { handler } = require('../utils/handler');
 
 module.exports = function getCacheLocation() {
-  try {
+  return handler(() => {
     const cacheLocation = path.join(
       process.cwd(),
       'node_modules',
@@ -13,6 +14,5 @@ module.exports = function getCacheLocation() {
       makeDir(cacheLocation);
     }
     return cacheLocation;
-  } catch (e) {}
-  return null;
+  }, null);
 };

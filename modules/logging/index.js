@@ -21,7 +21,7 @@ module.exports = {
     logger('yellow', args);
   },
   error(...args) {
-    logger('red', args);
+    console.error(...args);
   },
   info(...args) {
     logger('blue', args);
