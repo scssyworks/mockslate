@@ -1,1 +1,7 @@
-module.exports = require('./cache');
+const { formatCacheKey, formatRequestBody } = require('./formatCacheKey');
+
+module.exports = {
+  formatCacheKey,
+  formatRequestBody,
+  ...require('./cache'),
+};

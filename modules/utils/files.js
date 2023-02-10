@@ -23,7 +23,7 @@ function readJSON(inputPath) {
       encoding: 'utf-8',
     });
     const parsedData = JSON.parse(fileData.trim()); // If parse failed, method will return empty object
-    if (!parsedData) {
+    if (!isObject(parsedData)) {
       throw new Error(errors.INVALID_DATA_ERR);
     }
     return parsedData;

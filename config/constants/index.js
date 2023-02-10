@@ -28,6 +28,7 @@ const messages = {
   SYNC: 'Expectations synced...',
   EXP_REMOVED: 'Removed expectation: {0}',
   EXP_ADDED: 'Added expectation: {0}',
+  EXP_UPDATED: 'Updated expectation: {0}',
   PORT: 'Server is listening on {0}',
   CACHE: 'Warming up cache...',
   CACHE_READY: 'Expectations are ready!',

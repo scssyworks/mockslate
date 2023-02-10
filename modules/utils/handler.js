@@ -14,7 +14,6 @@ module.exports = {
     } catch (e) {
       if (args.test) {
         error(e);
-        console.log(e);
       }
       return defaultValue;
     }

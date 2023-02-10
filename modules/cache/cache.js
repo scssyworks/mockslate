@@ -5,12 +5,13 @@ const EventEmitter = require('events');
 const { log, info } = require('../logging');
 const {
   isObject,
-  toQS,
   deleteKey,
   writeJSON,
   formatMessage,
+  exists,
 } = require('../utils');
 const { events, codes, messages } = require('../../config/constants');
+const { formatCacheKey, formatRequestBody } = require('./formatCacheKey');
 
 let inMemoryCache = {};
 const requestCache = {};
@@ -41,12 +42,7 @@ module.exports = {
   cache(content, filePath) {
     const { httpRequest, httpResponse } = content;
     if (isObject(httpRequest)) {
-      const {
-        method,
-        path,
-        body = {},
-        queryStringParameters = {},
-      } = httpRequest;
+      const { method, path, body, queryStringParameters } = httpRequest;
       let code = codes.SUCCESS;
       if (isObject(httpResponse)) {
         const { status, statusCode } = httpResponse;
@@ -58,13 +54,22 @@ module.exports = {
         typeof path === 'string' &&
         path.trim()
       ) {
-        const cacheKey = `${method} ${path.split('?')[0]} c:${code} qs:${toQS(
-          queryStringParameters
-        )} body:${toQS(body)}`.trim();
-        if (!(cacheKey in inMemoryCache)) {
+        const cacheKey = formatCacheKey(
+          method,
+          path,
+          code,
+          queryStringParameters,
+          body
+        );
+        if (cacheKey in inMemoryCache) {
+          if (!exists(inMemoryCache[cacheKey])) {
+            log(formatMessage(messages.EXP_UPDATED, [cacheKey]));
+            inMemoryCache[cacheKey] = filePath;
+          }
+        } else {
           log(formatMessage(messages.EXP_ADDED, [cacheKey]));
+          inMemoryCache[cacheKey] = filePath;
         }
-        inMemoryCache[cacheKey] = filePath;
       }
     }
     return content;
