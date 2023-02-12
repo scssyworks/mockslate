@@ -1,41 +1,29 @@
-const { v4: uuid } = require('uuid');
-const path = require('path');
-const getCacheLocation = require('./getCacheLocation');
 const EventEmitter = require('events');
 const { log, info } = require('../logging');
 const {
   isObject,
   deleteKey,
-  writeJSON,
   formatMessage,
   exists,
+  writeJSON,
 } = require('../utils');
 const { events, codes, messages } = require('../../config/constants');
-const { formatCacheKey, formatRequestBody } = require('./formatCacheKey');
+const { formatCacheKey } = require('./formatCacheKey');
+const path = require('path');
+const { v4: uuid } = require('uuid');
+const getCacheLocation = require('./getCacheLocation');
+
+const cacheLocation = getCacheLocation();
 
 let inMemoryCache = {};
 const requestCache = {};
 const removeFromCacheEntries = [];
-const cacheLocation = getCacheLocation();
 const cacheEmitter = new EventEmitter();
 let cachePromise = new Promise((resolve, reject) => {
   cacheEmitter
     .on(events.SUCCESS, () => resolve(inMemoryCache))
     .on(events.ERROR, reject);
 });
-
-function dumpCache() {
-  removeFromCacheEntries.forEach((entry) => {
-    deleteKey(inMemoryCache, entry);
-  });
-  writeJSON(path.join(cacheLocation, `${uuid()}.json`), inMemoryCache);
-  cachePromise = null;
-  process.exit(0);
-}
-process
-  .on('SIGINT', dumpCache)
-  .on('SIGQUIT', dumpCache)
-  .on('SIGTERM', dumpCache);
 
 module.exports = {
   cacheEmitter,
@@ -79,6 +67,13 @@ module.exports = {
   },
   getCache() {
     return inMemoryCache;
+  },
+  dumpCache() {
+    removeFromCacheEntries.forEach((entry) => {
+      deleteKey(inMemoryCache, entry);
+    });
+    writeJSON(path.join(cacheLocation, `${uuid()}.json`), inMemoryCache);
+    process.exit(0);
   },
   waitForCache() {
     return cachePromise;
