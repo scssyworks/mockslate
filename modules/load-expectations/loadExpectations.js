@@ -1,6 +1,6 @@
 const { cacheEmitter, setCache } = require('../cache');
 const { log } = require('../logging');
-const getExistingCache = require('../cache/getExistingCache');
+const { getExistingCache } = require('../cache/getExistingCache');
 const { isEmptyObject } = require('../utils');
 const { messages, events } = require('../../config/constants');
 const { getExpectationDir } = require('./getExpectationDir');

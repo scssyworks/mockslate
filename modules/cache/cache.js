@@ -11,7 +11,7 @@ const { events, codes, messages } = require('../../config/constants');
 const { formatCacheKey } = require('./formatCacheKey');
 const path = require('path');
 const { v4: uuid } = require('uuid');
-const getCacheLocation = require('./getCacheLocation');
+const { getCacheLocation } = require('./getCacheLocation');
 
 const cacheLocation = getCacheLocation();
 

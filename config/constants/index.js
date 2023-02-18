@@ -1,3 +1,7 @@
+const LIB = 'mockslate';
+const NM = 'node_modules';
+const CACHE_DIR = '.cache';
+
 const codes = {
   SUCCESS: 200,
   NOT_FOUND: 404,
@@ -35,6 +39,9 @@ const messages = {
 };
 
 module.exports = {
+  LIB,
+  NM,
+  CACHE_DIR,
   codes,
   errors,
   events,
